@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang='zh-CN'>
+<head>
+    <title><%= title %>| <%= Sys.cont.siteName %></title>
+    <%- include header.ejs %>
+</head>
+<body>
+<%- include topbar.ejs %>
+
+<div class="container">
+    <div class="col-md-9">
+        <div class="panel panel-default" style="border-top: 2px solid #CC6600">
+            <div class="panel-body">
+                <div class="col-md-12">
+                    <div class="row">
+                        <div style="font-size: 20px;">•<a><%= item.title %></a></div>
+                        <span class="ny">
+                            <small><a href="/user/view/<%= item.userid %>/wdwz"> <%= item.username %></a> By</small>
+                            <small><i class="glyphicon glyphicon-time"></i> <%= moment(item.created).format('MM-DD HH:SS') %></small>
+                            <small><i class="glyphicon glyphicon-eye-open"></i> 围观 <%= item.readcount %>次</small>
+                            <small><i class="glyphicon glyphicon-refresh"></i> 编辑日期：<%= moment(item.updated).format('MM-DD HH:mm') %></small>
+                            <% if (locals.user && (locals.user.id_===userInfo.id_ || locals.user.role==="1")) { %>
+                                <small><i class="glyphicon glyphicon-edit"></i> <a href="/edit_article/<%=item.id_%>">编辑</a></small>
+                            <%}%>
+                        </span>
+                    </div>
+                    <div class="row" style="border-top:solid 1px #F6F6F6;padding-top: 20px;margin-top: 5px;min-height:500px;">
+                        <%- item.content %>
+                    </div>
+                    <div class="row" style="border-top:solid 1px #F6F6F6;padding-top: 5px;">
+                        <div class="pull-left" style="font-size: 9px;">
+                            <i class="glyphicon glyphicon-tag"></i> <%=item.keyword%>
+                        </div>
+                        <div class="pull-right" >
+                            <!--<button type="button" class="btn btn-success"><i class="glyphicon glyphicon-share-alt">发表评论</i></button>-->
+                            <button type="button" class="btn btn-primary btn-sm" id="userdown" value="<%=item.id_%>"><i class="glyphicon glyphicon-thumbs-down"> <%=userdownCot%></i></button>
+                            <button type="button" class="btn btn-primary btn-sm" id="userbookmark" value="<%=item.id_%>"><i class="glyphicon glyphicon-bookmark"> <%=shouCot%></i></button>
+                            <button type="button" class="btn btn-primary btn-sm" id="userup" value="<%=item.id_%>"><i class="glyphicon glyphicon-thumbs-up"> <%=userupCot%></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel panel-default" style="margin-top: 30px;"><!-- style="border-top: 2px solid #008800;"-->
+            <div class="panel-heading">回复 <span id="commentsNum"><%if(comments && comments.length>0) {%>(<%=comments.length%>)<%}else{%>(0)<%}%>：</span></div>
+            <div class="panel-body" style="padding:0px;" id="commmentsDiv">
+                <%if(comments && comments.length>0) {%>
+                    <% comments.forEach(function(item2,i){ %>
+                    <div  style="margin-top:5px;margin-bottom:5px;height: 50px;border-bottom: 1px solid #eed3d7;font-size: 12px;">
+                        <div class="col-md-12">
+                            <span class="msno">#<%=(i+1)%></span> 楼  <b><%= item2.username %></b> <%=item2.comment%>
+                            <span class="pull-right">
+                                | <a><%= moment(item2.commenttime).format('MM-DD HH:mm') %></a>
+                                <% if (locals.user != null){%> | <a onclick="userCommentModalClick('<%= item2.userid %>','<%= item2.username %>','<%=item.id_%>')">回复</a>
+                                    <%if (item2.userid==locals.user.id_|| locals.user.role==="1"){%>
+                                    |  <a onclick="userCommentDelClick('<%=item2.id_%>',this)">删除</a>
+                                    <%}%>
+                                <%}%>
+                            </span>
+                        </div>
+                    </div>
+                    <% })%>
+                <%} else {%>
+                   <div class="center-block" style="width: 300px;">还没有评论，沙发等你来抢,+_+</div>
+                <%}%>
+            </div>
+        </div>
+        <% if (locals.user != null){%>
+        <span class="btn btn-sm slintbtn">评论:<%= item.title %></span>
+        <div class="sline"></div>
+        <div class="panel">
+            <div class="panel-body">
+                <form class="form" action="/comment/add_comment" method="post" id="commentform">
+                    <div class="form-group">
+                        <textarea class="form-control" style="height:130px;max-height: 150px;" name="usercomment"></textarea>
+                    </div>
+                    <div class="pull-left">
+                    #请文明发言#
+                    </div>
+                    <div class="pull-right">
+                        <button type="button" id="submitComment" value="<%=item.id_%>" class="btn btn-success" style="width:100px;">
+                            <i class="glyphicon glyphicon-share-alt"></i> 提交</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <%}%>
+    </div>
+
+    <div class="col-md-3">
+            <div class="panel panel-default">
+            <div class="panel-heading">
+                作者信息
+            </div>
+            <div class="panel-body defColor">
+                <img src="/static/img/tz.png">
+                <%if (locals.user && locals.user.id_==userInfo.id_) {%>
+                    <a href="/user/view/<%=userInfo.id_%>/wdwz"><%=userInfo.username%></a>
+                    <%if(userInfo.role==="1"){%>
+                    <span style="color: tomato;" class="bwz">管理员</span>
+                    <%}else{%>
+                    <span style="color: dodgerblue;" class="bwz">会员</span>
+                    <%}%>
+                    <%if (locals.user && locals.user.id_!=userInfo.id_) {%>
+                    <button class="btn btn-info pull-right" id="userattention" value="<%=userInfo.id_%>" >+关注</button>
+                    <%}%>
+                    <div>积分:<%=userInfo.integral%></div>
+                    <div><span class="bwz"><%=moment(userInfo.registertime).format('YYYY年MM月DD日 HH:SS')%></span> 注册</div>
+                    <br>
+                    <div>用户简介:<%=userInfo.desc%></div>
+                <%}else {%>
+                    <a  href="/user/view/<%=userInfo.id_%>/wdwz"><%=userInfo.username%></a>
+                    <button class="btn btn-primary btn-sm pull-right" id="userattention" value="<%=userInfo.id_%>" >+关注</button>
+                    <div>积分:<%=userInfo.integral%></div>
+                    <div><span class="bwz"><%=moment(userInfo.registertime).format('YYYY年MM月DD日 HH:SS')%></span> 注册</div>
+                    <br>
+                    <div>用户简介:<%=userInfo.desc%></div>
+                <%}%>
+            </div>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                作者文章
+            </div>
+            <div class="panel-body padding0" >
+                <% userArtide.forEach(function(item){ %>
+                <div class="col-md-12 viewrecord">
+                    <a  href="/article/view/<%=item.id_%>"><%= item.title %></a>
+                </div>
+                <% }) %>
+            </div>
+        </div>
+        <!--<div class="panel panel-default">
+            <div class="panel-heading">
+                -并无此文-
+            </div>
+
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                热门文章
+            </div>
+            <div class="panel-body padding0" >
+                <% hotArtide.forEach(function(item){ %>
+                <div class="col-md-12 viewrecord">
+                   <a href="/article/view/<%=item.id_%>"><%= item.title %></a>
+                </div>
+                <% }) %>
+            </div>
+        </div>-->
+    </div>
+
+    <form class="form" action="/comment/add_comment" method="post" id="moform">
+        <div class="modal fade" id="userCommentModal" tabindex="-1" role="dialog" >
+            <div class="modal-dialog" style="width: 400px;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <b> 回复: </b><span name="mheader"></span>
+                    </div>
+                    <div class="modal-body">
+                        <input name="commendid" class="hidden">
+                        <input name="artideid" class="hidden">
+                        <textarea class="form-control" style="max-width: 380px;height:130px;" name="usercomment" required="required"></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">关闭</button>
+                        <a class="btn btn-primary" id="usercommentSub">提交</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<div id="goTopBtn"></div>
+<%- include footer.ejs %>
+<script type="text/javascript">
+    $(window).scroll(function(){
+        var sc=$(window).scrollTop();
+        if(sc>150){
+            $("#goTopBtn").fadeIn(100);
+        }else{
+            $("#goTopBtn").fadeOut(100);
+        }
+    })
+
+    $("#goTopBtn").click(function(){
+        var sc=$(window).scrollTop();
+        $('body,html').animate({scrollTop: 0}, 500);
+    })
+    //关注用户
+    $("#userattention").bind("click",function(){
+        if(!_islogin){
+            $.showMsg("您还没有登录");
+            return;
+        }
+        $.post('/attention/add_userattention',
+        {relid:$("#userattention").attr("value")},
+        function(data){
+            if(data.success){
+                $("#userattention").text("-取消关注");
+            }
+        }
+        ,'json');
+    });
+    //收藏文章
+    $("#userbookmark").bind("click",function(){
+        if(!_islogin){
+            $.showMsg("您还没有登录");
+            return;
+        }
+        $.post('/attention/add_artideattention',
+        {relid:$("#userbookmark").attr("value")},
+        function(data){
+            if(data.success){
+                $("#userbookmark i").text(" "+data.count);
+            }
+        }
+        ,'json');
+    });
+    $("#userdown").bind("click",function(){
+        if(!_islogin){
+            $.showMsg("您还没有登录");
+            return;
+        }
+        $.post('/reviews/user_down_artide',
+        {relid:$("#userdown").attr("value")},
+        function(data){
+            if(data.success){
+                $("#userdown i").text(" "+data.count);
+            }
+        }
+        ,'json');
+    });
+    $("#userup").bind("click",function(){
+        if(!_islogin){
+            $.showMsg("您还没有登录");
+            return;
+        }
+        $.post('/reviews/user_up_artide',
+        {relid:$("#userup").attr("value")},
+        function(data){
+            if(data.success){
+                $("#userup i").text(" "+data.count);
+            }
+        }
+        ,'json');
+    });
+
+    //加载评论
+    function initComment(userComment){
+        if(userComment){
+            var tr='<div  style="padding:0px;height: 50px;border-bottom: 1px solid #126d8d;font-size: 12px;">'+
+            '<div class="col-md-12">'+
+            '#'+userComment.commentsCot+'楼  <b>'+userComment.username+'</b> '+userComment.comment+
+            '<span class="pull-right">'+
+            ' | <a>'+ userComment.commenttime +'</a> | <a onclick=userCommentModalClick("'+userComment.userid+'","'+userComment.username+'","'+userComment.artideid+'")>回复</a>'+
+            ' | <a onclick=userCommentDelClick("'+userComment.id_+'",this)>删除</a>'+
+            '</span>'+
+            '</div>';
+            $("#commmentsDiv").append(tr);
+        }
+    }
+    //提交评论
+    $("#submitComment").bind('click',function(){
+        if(!_islogin){
+            $.showMsg("您还没有登录");
+            return;
+        }
+        //validate
+        var usercomment=$("#commentform textarea[name=usercomment]").val();
+        if(usercomment==null || usercomment==""){
+            $.showErr("回复内容不能为空!");
+            return;
+        }
+
+        $.post('/comment/add_comment',
+        {artideid:$("#submitComment").attr("value"),comment:usercomment},
+        function(data){
+            if(data.success){
+                initComment(data.userComment);
+                $("#commentform textarea[name=usercomment]").val("");
+            }
+        }
+        ,'json');
+    });
+
+    //serialize
+    $("#usercommentSub").bind('click',function(){
+        if(!_islogin){
+            $.showMsg("您还没有登录");
+            return;
+        }
+        //validate
+        var usercomment=$("#moform textarea[name=usercomment]").val();
+        if(usercomment==null || usercomment==""){
+            $.showErr("回复内容不能为空!");
+            return;
+        }
+
+        $.post('/comment/add_comment',
+                {artideid:$("#moform input[name=artideid]").val(),commendid:$("#moform input[name=commendid]").val(),comment:usercomment},
+                function(data){
+                    if(data.success){
+
+                        $("#moform textarea[name=usercomment]").val("");
+                        $("#userCommentModal").modal('hide');
+                    }
+                }
+                ,'json');
+    });
+    function userCommentModalClick(userid,username,artideid){
+        if(!_islogin){
+            $.showMsg("您还没有登录");
+            return;
+        }
+        $("#userCommentModal").modal();
+        $("#userCommentModal input[name=commendid]").val(userid);
+        $("#userCommentModal span[name=mheader]").text(username);
+        $("#userCommentModal input[name=artideid]").val(artideid);
+    }
+    function userCommentDelClick(commentId,obj){
+        if(!_islogin){
+            $.showMsg("您还没有登录");
+            return;
+        }
+        $.post("/comment/remove_comment/"+commentId,{},function(data){
+           if(data.success){
+               var row=$(obj).closest("div").parent();
+               row.remove();
+               updataSno();
+           }
+        },"json");
+    }
+    function updataSno(){
+       var snos= $("#commmentsDiv span[class=msno]");
+        $.each(snos,function(i,r){
+            $(this).text("#"+(i+1));
+        });
+        $("#commentsNum").text("("+snos.size()+")：");
+        if(snos.size()==0){
+            $("#commmentsDiv").append('<div class="center-block" style="width: 300px;">还没有评论，沙发等你来抢,+_+</div>');
+        }
+    }
+</script>
+</body>
+</html>

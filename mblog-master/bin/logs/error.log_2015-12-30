@@ -1,0 +1,12 @@
+
+[2015-12-30 21:42:43] [ERROR] Error: Can't set headers after they are sent.
+    at ServerResponse.OutgoingMessage.setHeader (_http_outgoing.js:335:11)
+    at Array.write (g:\nodeJs\mblog-master\node_modules\express\node_modules\finalhandler\index.js:126:9)
+    at listener (g:\nodeJs\mblog-master\node_modules\express\node_modules\on-finished\index.js:169:15)
+    at onFinish (g:\nodeJs\mblog-master\node_modules\express\node_modules\on-finished\index.js:100:5)
+    at callback (g:\nodeJs\mblog-master\node_modules\express\node_modules\on-finished\node_modules\ee-first\index.js:55:10)
+    at IncomingMessage.onevent (g:\nodeJs\mblog-master\node_modules\express\node_modules\on-finished\node_modules\ee-first\index.js:93:5)
+    at emitNone (events.js:67:13)
+    at IncomingMessage.emit (events.js:166:7)
+    at endReadableNT (_stream_readable.js:905:12)
+    at doNTCallback2 (node.js:441:9)

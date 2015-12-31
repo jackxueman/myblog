@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang='zh-CN'>
+<head>
+    <title>编辑文章 | <%= Sys.cont.siteName %></title>
+    <%- include header.ejs %>
+</head>
+<body>
+<%- include topbar.ejs %>
+
+<div class="container panel">
+    <div class="col-md-2" >
+        <div style="height: 40px;width: 55px;background-color: #126d8d;text-align: center;">
+            <div style="color: #ffffff;font-weight: bold;font-size: 14px;"><%= moment().format('DD') %></div>
+            <div style="color: #ffffff;font-size: 11px;"><%= moment().format('YYYY-MM') %></div>
+        </div>
+    </div>
+    <div class="col-md-10">
+        <form class="form" name="artideForm" action="/article/save_article" method="post">
+                <input class="hide" name="id_" value="<%= (flag=='edit' ? article.id_ :'') %>">
+                <input class="hide" value="1" name="status">
+                <input class="hide" value="<%=flag%>" name="flag">
+
+                <div class=" form-group">
+                    <label style="background:#428BD1;width: 15px;height: 8px;margin-right: 5px;"> </label><label>博客标题:</label>
+                    <div class="row">
+                        <div class="col-md-2"  >
+                            <select  name="type" class="form-control">
+                                <% Sys.cont.getArticleType().forEach(function(item){ %>
+                                    <%if(flag=='edit' && article.type==item.value){%>
+                                        <option value="<%= item.value %>" selected="selected"><%= item.key %></option>
+                                    <%}else{%>
+                                        <option value="<%= item.value %>"><%= item.key %></option>
+                                    <%}%>
+                                <%})%>
+                            </select>
+                        </div>
+                        <div class="col-md-10" >
+                            <input class="form-control pull-left"  name="title" value="<%= (flag=='edit' ? article.title :'') %>">
+                        </div>
+                    </div>
+                </div>
+
+                <div class=" form-group">
+                    <label style="background:#d2322d;width: 15px;height: 8px;margin-right: 5px;"> </label><label>博客摘要:</label>
+                    <textarea class="form-control" name="digest" style="height:100px;"><%= (flag=='edit' ?(article.digest ? article.digest:''):'') %></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label style="background:#40aa53;width: 15px;height: 8px;margin-right: 5px;"></label><label>博客正文:</label>
+                    <script id="editor" type="text/plain" style="height:380px;"><%- (flag=='edit' ? article.content:'') %></script>
+                    <!--<textarea class="form-control" id="editor" style="height:350px;" name="content"></textarea>-->
+                </div>
+
+                <div class="form-group">
+                    <label style="background:#40aa53;width: 15px;height: 8px;margin-right: 5px;"></label><label>关键字:</label>
+                    <input class="form-control" placeholder="添加关键字，并以逗号分开" value="<%= (flag=='edit' ? article.keyword:'') %>" name="keyword">
+                </div>
+
+                <div class="pull-left">
+                    <div class="checkbox">
+                        <input type="checkbox" checked>
+                        <label>允许评论</label>
+                    </div>
+                </div>
+                <div class="pull-right">
+                    <span class="btn btn-primary" id="preview">预览</span>
+                    <%if(flag=='edit'){%>
+                        <span id="submitForm" class="btn btn-info">保存博客</span>
+                    <%}else{%>
+                        <span id="submitForm" class="btn btn-info">马上发布</span>
+                    <%}%>
+                </div>
+        </form>
+    </div>
+</div>
+
+<%- include footer.ejs %>
+<script src="/static/lib/ueditor/ueditor.config.js"></script>
+<script src="/static/lib/ueditor/ueditor.all.min.js"></script>
+<script type="text/javascript">
+    var um = UE.getEditor('editor',{textarea:'content'});
+    $(function () {
+        //$(".mfooter").css("position", "fixed");
+        $("#preview").click(function(){
+            um.execCommand('preview');
+        });
+        $("#submitForm").bind('click', function () {
+            if (!_islogin) {
+                $.showMsg("您还没有登录");
+                return;
+            }
+            //validate
+            var content = um.getContent();
+            var title = $("input[name=title]").val();
+            var type = $("select[name=type]").val();
+            var digest = $("textarea[name=digest]").val();
+            if (title == null || title == "") {
+                $.showErr("博客标题不能为空!");
+                return;
+            } else if (type == null || type == "") {
+                $.showErr("博客类型不能为空!");
+                return;
+            } else if (digest == null || digest == "") {
+                $.showErr("博客摘要不能为空!");
+                return;
+            } else if (content == null || content == "") {
+                $.showErr("博客内容不能为空!");
+                return;
+            }
+            $("form[name=artideForm]").submit();
+        });
+    });
+</script>
+</body>
+</html>
